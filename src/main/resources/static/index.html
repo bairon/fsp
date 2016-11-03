@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html ng-app="fspApp" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sd="http://www.thymeleaf.org/spring-data">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+
+    <title>AngularJS Task Manager</title>
+    <link th:href="@{/resources/css/style.css}" rel="stylesheet" type="text/css" />
+    <script data-require="angular.js@*" data-semver="1.3.0-beta.14"
+            src="http://code.angularjs.org/1.3.0-beta.14/angular.js"></script>
+    <script data-require="angular-animate@*" data-semver="1.3.0-beta.14"
+            src="http://code.angularjs.org/1.3.0-beta.14/angular-animate.js"></script>
+    <script src="/js/fsp.js"></script>
+</head>
+<body>
+<div ng-controller="fspController">
+    <h2 class="page-title">Screens</h2>
+
+    <!--<button id="start" type="button" class="btn btn-success" onclick="FSPY.startWork()">Start</button>-->
+    <!--<button id="stop" type="button" class="btn btn-danger" onclick="FSPY.stopWork()">Stop</button>-->
+    <!--<button id="stopping" type="button" class="btn btn-danger" onclick="FSPY.stoppingClicked()">Stopping</button>-->
+    <table>
+        <tr ng-repeat="entry in entries">
+            <td >
+                <input id="{{entry.id}}" type="checkbox" value="{{entry.id}}" ng-checked="selection.indexOf(entry.id) > -1" ng-click="toggleSelection(entry.id)" />
+                <label for="{{entry.id}}" ></label>
+            </td>
+            <td>
+                <a target-blank="" href="http://prnt.sc/{{entry.prntscr}}">{{entry.prntscr}}</a>
+            </td>
+            <td>
+                <img src="{{entry.image}}"/>
+            </td>
+        </tr>
+    </table>
+</div>
+
+</body>
+</html>
