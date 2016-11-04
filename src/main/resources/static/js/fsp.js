@@ -8,7 +8,7 @@ fspModule.controller('fspController', function ($scope,$http) {
 
     function findAllEntries() {
         //get all entries and display initially
-        $http.get(urlBase + '/api/entries?page=1').
+        $http.get(urlBase + '/api/entries?page=0').
         success(function (data) {
             if (data.content != undefined) {
                 $scope.entries = data.content;

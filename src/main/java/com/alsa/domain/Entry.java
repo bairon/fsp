@@ -15,4 +15,9 @@ public class Entry {
     public long id;
     public String prntscr;
     public String url;
+
+    public Entry(String prntscr, String url) {
+        this.prntscr = prntscr;
+        this.url = url;
+    }
 }
