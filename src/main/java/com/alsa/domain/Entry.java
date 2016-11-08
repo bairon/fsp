@@ -16,6 +16,9 @@ public class Entry {
     public String prntscr;
     public String url;
 
+    public Entry() {
+    }
+
     public Entry(String prntscr, String url) {
         this.prntscr = prntscr;
         this.url = url;
