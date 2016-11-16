@@ -30,14 +30,18 @@ public class BlockServiceImpl implements BlockService {
             result = processingBlocks.get(0);
         } else {
             Iterable<Block> bases = blockRepository.findAll(new Sort(Sort.Direction.DESC, "base"));
-            Block latestBlock = bases.iterator().next();
-            Block newBlock = new Block();
-            newBlock.processedTime = new Date();
-            newBlock.base = Utils.plusOneBase36(latestBlock.base);
-            newBlock.status = BlockStatus.PROCESSING;
-            result = newBlock;
+            if (bases.iterator().hasNext()) {
+                Block latestBlock = bases.iterator().next();
+                Block newBlock = new Block();
+                newBlock.processedTime = new Date();
+                newBlock.base = Utils.plusOneBase36(latestBlock.base);
+                newBlock.status = BlockStatus.PROCESSING;
+                result = newBlock;
+            }
         }
-        blockRepository.save(result);
+        if (result != null) {
+            blockRepository.save(result);
+        }
         return result;
     }
 
