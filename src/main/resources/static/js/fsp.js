@@ -21,21 +21,7 @@ fspModule.controller('fspController', function ($scope,$http) {
     findAllEntries();
 });
 
-//Angularjs Directive for confirm dialog box
-fspModule.directive('ngConfirmClick', [
-    function(){
-        return {
-            link: function (scope, element, attr) {
-                var msg = attr.ngConfirmClick || "Are you sure?";
-                var clickAction = attr.confirmedClick;
-                element.bind('click',function (event) {
-                    if ( window.confirm(msg) ) {
-                        scope.$eval(clickAction);
-                    }
-                });
-            }
-        };
-    }]);
+
 fspModule.directive('targetBlank', function() {
     return {
         compile: function (element) {

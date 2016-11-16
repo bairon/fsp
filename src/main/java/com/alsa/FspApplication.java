@@ -1,7 +1,9 @@
 package com.alsa;
 
 import com.alsa.domain.Base;
+import com.alsa.domain.PrntscrResponse;
 import com.alsa.repository.BaseRepository;
+import com.alsa.service.PrntscrService;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
@@ -15,6 +17,9 @@ import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
@@ -25,48 +30,40 @@ public class FspApplication {
 	@Autowired
 	BaseRepository baseRepository;
 
+	@Autowired
+	PrntscrService prntscrService;
+
+	public static void main(String[] args) {
+		SpringApplication.run(FspApplication.class, args);
+	}
+
 	@PostConstruct
 	public void init() {
 		Base b = new Base();
 		b.id = 1L;
 		b.base = getCurrentBase();
-		//baseRepository.save(b);
+		if (b.base != null && b.base.length() > 0) {
+			Utils.withRole("ROLE_ADMIN");
+			baseRepository.save(b);
+			Utils.clearRole();
+			SecurityContextHolder.clearContext();
+		}
 	}
 
 	private String getCurrentBase() {
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		HttpPost uploadFile = new HttpPost("https://prntscr.com/upload.php");
-		MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 		InputStream stream = getClass().getClassLoader().getResourceAsStream("static/img/space.png");
-		String responseString = null;
-		try {
-			builder.addBinaryBody(
-					"image",
-					stream,
-					ContentType.create("image/png"),
-					"space.png"
-			);
-			HttpEntity multipart = builder.build();
-			uploadFile.setEntity(multipart);
-			CloseableHttpResponse response = httpClient.execute(uploadFile);
-			StatusLine statusLine = response.getStatusLine();
-			System.out.println(statusLine.toString());
-			HttpEntity responseEntity = response.getEntity();
-			BasicResponseHandler basicResponseHandler = new BasicResponseHandler();
-			responseString = basicResponseHandler.handleEntity(responseEntity);
-			System.out.println(responseString);
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		PrntscrResponse prntscrResponse = prntscrService.uploadImage(stream);
+		if (prntscrResponse != null) {
+			if (prntscrResponse.status.equalsIgnoreCase("success")) {
+				String url = prntscrResponse.data;
+				if (url != null && url.trim().length() > 0) {
+					String prntscrid = url.substring(url.lastIndexOf("/") + 1);
+					return prntscrid.substring(0, prntscrid.length() - 1);
+				}
+			} else {
+				System.out.println(prntscrResponse.data);
+			}
 		}
-		return responseString;
-	}
-
-	public static void main(String[] args) {
-		SpringApplication.run(FspApplication.class, args);
+		return null;
 	}
 }

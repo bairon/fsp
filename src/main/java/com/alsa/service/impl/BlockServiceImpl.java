@@ -1,12 +1,17 @@
 package com.alsa.service.impl;
 
 import com.alsa.Utils;
+import com.alsa.domain.Base;
 import com.alsa.domain.Block;
 import com.alsa.domain.BlockStatus;
+import com.alsa.repository.BaseRepository;
 import com.alsa.repository.BlockRepository;
 import com.alsa.service.BlockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -20,6 +25,9 @@ public class BlockServiceImpl implements BlockService {
     @Autowired
     BlockRepository blockRepository;
 
+    @Autowired
+    BaseRepository baseRepository;
+
     @Override
 
     public synchronized Block create() {
@@ -29,15 +37,14 @@ public class BlockServiceImpl implements BlockService {
             processingBlocks.get(0).processedTime = new Date();
             result = processingBlocks.get(0);
         } else {
-            Iterable<Block> bases = blockRepository.findAll(new Sort(Sort.Direction.DESC, "base"));
-            if (bases.iterator().hasNext()) {
-                Block latestBlock = bases.iterator().next();
-                Block newBlock = new Block();
-                newBlock.processedTime = new Date();
-                newBlock.base = Utils.plusOneBase36(latestBlock.base);
-                newBlock.status = BlockStatus.PROCESSING;
-                result = newBlock;
-            }
+            Base base = baseRepository.findOne(1L);
+            base.base = Utils.plusOneBase36(base.base);
+            baseRepository.save(base);
+            Block newBlock = new Block();
+            newBlock.processedTime = new Date();
+            newBlock.base = base.base;
+            newBlock.status = BlockStatus.PROCESSING;
+            result = newBlock;
         }
         if (result != null) {
             blockRepository.save(result);
