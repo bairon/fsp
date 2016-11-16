@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 /**
  * Created by alsa on 03.11.2016.
  */
@@ -24,6 +26,7 @@ public class EntryServiceImpl implements EntryService {
 
     @Override
     public Entry save(Entry entry) {
+        entry.timestamp = new Date();
         return entryRepository.save(entry);
     }
 

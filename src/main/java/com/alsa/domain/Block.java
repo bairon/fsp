@@ -1,8 +1,6 @@
 package com.alsa.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -14,6 +12,7 @@ public class Block {
     @Id
     @GeneratedValue
     public long id;
+    @Column(unique=true)
     public String base;
     public BlockStatus status;
     public Date processedTime;

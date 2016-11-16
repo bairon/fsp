@@ -38,13 +38,16 @@ public class BlockServiceImpl implements BlockService {
             result = processingBlocks.get(0);
         } else {
             Base base = baseRepository.findOne(1L);
-            base.base = Utils.plusOneBase36(base.base);
-            baseRepository.save(base);
+            while(!blockRepository.findAllByBase(base.base).isEmpty()) {
+                base.base = Utils.plusOneBase36(base.base);
+            }
             Block newBlock = new Block();
             newBlock.processedTime = new Date();
             newBlock.base = base.base;
             newBlock.status = BlockStatus.PROCESSING;
             result = newBlock;
+            base.base = Utils.plusOneBase36(base.base);
+            baseRepository.save(base);
         }
         if (result != null) {
             blockRepository.save(result);
