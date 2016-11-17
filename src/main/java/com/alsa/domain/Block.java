@@ -15,5 +15,5 @@ public class Block {
     @Column(unique=true)
     public String base;
     public BlockStatus status;
-    public Date processedTime;
+    public long processedTime;
 }

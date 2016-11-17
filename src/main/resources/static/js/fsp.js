@@ -5,7 +5,7 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
     $scope.totalItems = 1;
     $scope.currentPage = 1;
     $scope.limit = 20;
-    $scope.since;
+    $scope.since = 0;
 
     $scope.entries = [];
     $scope.screens = "Скрины";
@@ -22,6 +22,7 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
                 $scope.totalItems = data.totalElements;
                 angular.copy(data.content,  $scope.entries);
                 $scope.since = $scope.entries[0].timestamp;
+                $scope.screens = "Скрины";
             } else {
                 $scope.entries = [];
             }

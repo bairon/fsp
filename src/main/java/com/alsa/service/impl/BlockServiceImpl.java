@@ -33,8 +33,8 @@ public class BlockServiceImpl implements BlockService {
     public synchronized Block create() {
         Block result = null;
         List<Block> processingBlocks = blockRepository.findAllByStatus(BlockStatus.PROCESSING, new Sort("processedTime"));
-        if (processingBlocks.size() > 0 && System.currentTimeMillis() - processingBlocks.get(0).processedTime.getTime() > 1000 * 60 * 5) {
-            processingBlocks.get(0).processedTime = new Date();
+        if (processingBlocks.size() > 0 && System.currentTimeMillis() - processingBlocks.get(0).processedTime > 1000 * 60 * 5) {
+            processingBlocks.get(0).processedTime = System.currentTimeMillis();
             result = processingBlocks.get(0);
         } else {
             Base base = baseRepository.findOne(1L);
@@ -42,12 +42,14 @@ public class BlockServiceImpl implements BlockService {
                 base.base = Utils.plusOneBase36(base.base);
             }
             Block newBlock = new Block();
-            newBlock.processedTime = new Date();
+            newBlock.processedTime = System.currentTimeMillis();
             newBlock.base = base.base;
             newBlock.status = BlockStatus.PROCESSING;
             result = newBlock;
             base.base = Utils.plusOneBase36(base.base);
+            Utils.withRole("ROLE_ADMIN");
             baseRepository.save(base);
+            Utils.withRole("ROLE_USER");
         }
         if (result != null) {
             blockRepository.save(result);
@@ -58,7 +60,7 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public Block save(Block block) {
         block.status = BlockStatus.PROCESSED;
-        block.processedTime = new Date();
+        block.processedTime = System.currentTimeMillis();
         return blockRepository.save(block);
     }
 
