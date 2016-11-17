@@ -13,4 +13,5 @@ public interface EntryService {
     Entry save(Entry entry);
 
     int newcount(long since);
+    void clean();
 }

@@ -9,4 +9,5 @@ public interface BlockService {
     Block create();
 
     Block save(Block block);
+    void clean();
 }

@@ -4,7 +4,10 @@ import com.alsa.domain.Base;
 import com.alsa.domain.Entry;
 import com.alsa.domain.PrntscrResponse;
 import com.alsa.repository.BaseRepository;
+import com.alsa.repository.BlockRepository;
 import com.alsa.repository.EntryRepository;
+import com.alsa.service.BlockService;
+import com.alsa.service.EntryService;
 import com.alsa.service.PrntscrService;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -22,10 +25,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import static com.alsa.WebConstants.HOUR;
 
 @SpringBootApplication
 public class FspApplication {
@@ -34,10 +42,19 @@ public class FspApplication {
 	BaseRepository baseRepository;
 
 	@Autowired
+	BlockRepository blockRepository;
+
+	@Autowired
 	EntryRepository entryRepository;
 
 	@Autowired
 	PrntscrService prntscrService;
+
+	@Autowired
+	BlockService blockService;
+
+	@Autowired
+	EntryService entryService;
 
 	public static void main(String[] args) {
 		SpringApplication.run(FspApplication.class, args);
@@ -51,16 +68,20 @@ public class FspApplication {
 		b.base = getCurrentBase();
 		if (b.base != null && b.base.length() > 0) {
 			baseRepository.save(b);
-			SecurityContextHolder.clearContext();
 		}
-/*		for (int i = 0; i < 100; ++i) {
-			Entry entry = new Entry();
-			entry.prntscr = "12345" + String.valueOf(i);
-			entry.url = "12345";
-			entry.timestamp = (long) (System.currentTimeMillis() + Math.random() * 1000000);
-			entryRepository.save(entry);
-		}
-*/		Utils.clearRole();
+		Utils.clearRole();
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					blockService.clean();
+					entryService.clean();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}, HOUR, HOUR);
 	}
 
 	private String getCurrentBase() {

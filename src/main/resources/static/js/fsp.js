@@ -11,7 +11,7 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
     $scope.screens = "Скрины";
     $scope.update = function () {
         getEntries();
-    }
+    };
     $http.defaults.headers.post["Content-Type"] = "application/json";
 
     function getEntries() {
@@ -26,7 +26,17 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
             } else {
                 $scope.entries = [];
             }
+            for (i = 0; i < $scope.entries.length; i++) {
+                $scope.entries[i].time = formatDate($scope.entries[i].timestamp);
+            }
         });
+    }
+    function formatDate(timestamp) {
+        var d = new Date(timestamp);
+        return ("0" + d.getDate()).slice(-2) + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" +
+            d.getFullYear() + " " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+
+
     }
     getEntries();
     $scope.pageChanged = function() {

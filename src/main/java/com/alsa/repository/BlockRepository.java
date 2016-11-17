@@ -5,6 +5,7 @@ import com.alsa.domain.BlockStatus;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -14,5 +15,6 @@ import java.util.List;
 public interface BlockRepository extends CrudRepository<Block, Long> {
     List<Block> findAllByStatus(BlockStatus status, Sort sort);
     List<Block> findAllByBase(String base);
+    void deleteByProcessedTimeLessThan(long timestamp);
 
 }

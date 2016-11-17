@@ -13,9 +13,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+
+import static com.alsa.WebConstants.HOUR;
 
 /**
  * Created by alsa on 03.11.2016.
@@ -38,6 +41,8 @@ public class BlockServiceImpl implements BlockService {
             result = processingBlocks.get(0);
         } else {
             Base base = baseRepository.findOne(1L);
+            if (base == null || base.base == null || base.base.length() == 0)
+                throw new IllegalStateException("Base not set");
             while(!blockRepository.findAllByBase(base.base).isEmpty()) {
                 base.base = Utils.plusOneBase36(base.base);
             }
@@ -64,4 +69,11 @@ public class BlockServiceImpl implements BlockService {
         return blockRepository.save(block);
     }
 
+    @Override
+    @Transactional
+    public void clean() {
+        Utils.withRole("ROLE_ADMIN");
+        blockRepository.deleteByProcessedTimeLessThan(System.currentTimeMillis() - 12 * HOUR);
+        Utils.clearRole();
+    }
 }

@@ -13,4 +13,5 @@ public interface EntryRepository extends PagingAndSortingRepository<Entry, Long>
 
     @Query("select count(e) from Entry e where e.timestamp > ?1")
     int countOlder(long since);
+    void deleteByTimestampLessThan(long time);
 }

@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
 
-    <title>AngularJS Task Manager</title>
+    <title>Зеленая стрела - Коричневая полоса</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/css/fsp.css" />
     <script src="/js/angular.min.js"></script>
@@ -14,10 +14,22 @@
 <body>
 <div ng-controller="fspController">
     <h2 class="page-title"><a ng-click="update()">{{screens}}</a></h2>
-    <table>
+    <ul uib-pagination boundary-links="true"
+        items-per-page="limit"
+        total-items="totalItems"
+        ng-model="currentPage"
+        ng-change="pageChanged()"
+        class="pagination-sm"
+        previous-text="&lsaquo;"
+        next-text="&rsaquo;"
+        first-text="&laquo;"
+        last-text="&raquo;">
+    </ul>
+    <table class="table">
         <tr ng-repeat="entry in entries">
-            <td th:cellpadding="20px">
-                <a target-blank="" href="http://prnt.sc/{{entry.prntscr}}">{{entry.prntscr}}</a>
+            <td>
+                <a target-blank="" href="http://prnt.sc/{{entry.prntscr}}">{{entry.prntscr}}</a><br />
+                {{entry.time}}
             </td>
             <td>
                 <img src="{{entry.url}}"/>
