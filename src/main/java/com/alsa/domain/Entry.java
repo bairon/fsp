@@ -18,7 +18,7 @@ public class Entry {
     @Column(unique=true)
     public String prntscr;
     public String url;
-    public Date timestamp;
+    public long timestamp;
 
     public Entry() {
     }

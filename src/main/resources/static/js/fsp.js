@@ -1,24 +1,51 @@
-var fspModule = angular.module('fspApp', ['ngAnimate']);
+var fspModule = angular.module('fspApp', ['ui.bootstrap']);
 
-fspModule.controller('fspController', function ($scope,$http) {
+fspModule.controller('fspController', function ($scope,$http, $timeout) {
 
-    var urlBase="";
-    $scope.selection = [];
+    $scope.totalItems = 1;
+    $scope.currentPage = 1;
+    $scope.limit = 20;
+    $scope.since;
+
+    $scope.entries = [];
+    $scope.screens = "Скрины";
+    $scope.update = function () {
+        getEntries();
+    }
     $http.defaults.headers.post["Content-Type"] = "application/json";
 
-    function findAllEntries() {
+    function getEntries() {
         //get all entries and display initially
-        $http.get(urlBase + '/entries?page=0').
+        $http.get('/entries?page=' + ($scope.currentPage - 1) + "&sort=timestamp,desc").
         success(function (data) {
             if (data.content != undefined) {
-                $scope.entries = data.content;
+                $scope.totalItems = data.totalElements;
+                angular.copy(data.content,  $scope.entries);
+                $scope.since = $scope.entries[0].timestamp;
             } else {
                 $scope.entries = [];
             }
         });
     }
+    getEntries();
+    $scope.pageChanged = function() {
+        getEntries();
+    };
+    var asknew = function() {
+        $http.get('/entries/newcount?since=' + $scope.since).
+        success(function (data) {
+            if (data != undefined) {
+                if (data > 0) {
+                    $scope.screens = "Скрины обновить (" + data + " новых)";
+                }
+            }
+        });
+        $timeout(asknew, 10000);
+    };
 
-    findAllEntries();
+    $timeout(asknew, 10000);
+
+
 });
 
 

@@ -1,8 +1,10 @@
 package com.alsa;
 
 import com.alsa.domain.Base;
+import com.alsa.domain.Entry;
 import com.alsa.domain.PrntscrResponse;
 import com.alsa.repository.BaseRepository;
+import com.alsa.repository.EntryRepository;
 import com.alsa.service.PrntscrService;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -23,12 +25,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.util.Date;
 
 @SpringBootApplication
 public class FspApplication {
 
 	@Autowired
 	BaseRepository baseRepository;
+
+	@Autowired
+	EntryRepository entryRepository;
 
 	@Autowired
 	PrntscrService prntscrService;
@@ -39,15 +45,22 @@ public class FspApplication {
 
 	@PostConstruct
 	public void init() {
+		Utils.withRole("ROLE_ADMIN");
 		Base b = new Base();
 		b.id = 1L;
 		b.base = getCurrentBase();
 		if (b.base != null && b.base.length() > 0) {
-			Utils.withRole("ROLE_ADMIN");
 			baseRepository.save(b);
-			Utils.clearRole();
 			SecurityContextHolder.clearContext();
 		}
+/*		for (int i = 0; i < 100; ++i) {
+			Entry entry = new Entry();
+			entry.prntscr = "12345" + String.valueOf(i);
+			entry.url = "12345";
+			entry.timestamp = (long) (System.currentTimeMillis() + Math.random() * 1000000);
+			entryRepository.save(entry);
+		}
+*/		Utils.clearRole();
 	}
 
 	private String getCurrentBase() {

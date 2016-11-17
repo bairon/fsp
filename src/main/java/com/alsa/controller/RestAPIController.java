@@ -41,8 +41,11 @@ public class RestAPIController {
         if (bindingResult.hasErrors()) {
             throw new RuntimeException(bindingResult.getAllErrors().iterator().next().toString());
         }
-        return entryService.save(entry);
-
+        try {
+            return entryService.save(entry);
+        } catch (Throwable t) {
+            return null;
+        }
     }
     @RequestMapping(value = WebConstants.POST_BLOCK, method = RequestMethod.POST)
     public Block postBlock(@RequestBody Block block, BindingResult bindingResult) {
@@ -55,6 +58,11 @@ public class RestAPIController {
     @RequestMapping(value = WebConstants.ENTRIES, method = RequestMethod.GET)
     public Page<Entry> entries(Pageable pageable) {
         return entryService.listAllByPage(pageable);
+    }
+
+    @RequestMapping(value = WebConstants.ENTRIES_NEWCOUNT, method = RequestMethod.GET)
+    public int entries(long since) {
+        return entryService.newcount(since);
     }
 
 }

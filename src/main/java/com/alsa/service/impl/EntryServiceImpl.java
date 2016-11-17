@@ -26,8 +26,13 @@ public class EntryServiceImpl implements EntryService {
 
     @Override
     public Entry save(Entry entry) {
-        entry.timestamp = new Date();
+        entry.timestamp = System.currentTimeMillis();
         return entryRepository.save(entry);
+    }
+
+    @Override
+    public int newcount(long since) {
+        return entryRepository.countOlder(since);
     }
 
 }
