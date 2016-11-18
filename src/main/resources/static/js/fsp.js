@@ -10,6 +10,7 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
     $scope.entries = [];
     $scope.screens = "Скрины";
     $scope.update = function () {
+        $scope.currentPage = 1;
         getEntries();
     };
     $http.defaults.headers.post["Content-Type"] = "application/json";
@@ -21,8 +22,10 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
             if (data.content != undefined) {
                 $scope.totalItems = data.totalElements;
                 angular.copy(data.content,  $scope.entries);
-                $scope.since = $scope.entries[0].timestamp;
-                $scope.screens = "Скрины";
+                if ($scope.currentPage == 1) {
+                    $scope.since = $scope.entries[0].timestamp;
+                    $scope.screens = "Скрины";
+                }
             } else {
                 $scope.entries = [];
             }
