@@ -73,7 +73,7 @@ public class BlockServiceImpl implements BlockService {
     @Transactional
     public void clean() {
         Utils.withRole("ROLE_ADMIN");
-        blockRepository.deleteByProcessedTimeLessThan(System.currentTimeMillis() - 12 * HOUR);
+        blockRepository.deleteByProcessedTimeLessThan(System.currentTimeMillis() - HOUR);
         Utils.clearRole();
     }
 }
