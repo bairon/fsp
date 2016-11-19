@@ -62,7 +62,7 @@ public class FspApplication {
 
     @PostConstruct
     public void init() {
-        Utils.withRole("ROLE_ADMIN");
+        Utils.withRole("ROLE_USER", "ROLE_ADMIN");
         Base b = baseRepository.findOne(1L);
         if (b == null) {
             b = new Base();

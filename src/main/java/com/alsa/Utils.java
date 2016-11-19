@@ -14,7 +14,7 @@ public final class Utils {
         return Long.toString(base + 1, 36);
     }
 
-    public static void withRole(String role) {
+    public static void withRole(String ... role) {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("", "", AuthorityUtils.createAuthorityList(role)));
     }
 
