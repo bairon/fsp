@@ -38,66 +38,69 @@ import static com.alsa.WebConstants.HOUR;
 @SpringBootApplication
 public class FspApplication {
 
-	@Autowired
-	BaseRepository baseRepository;
+    @Autowired
+    BaseRepository baseRepository;
 
-	@Autowired
-	BlockRepository blockRepository;
+    @Autowired
+    BlockRepository blockRepository;
 
-	@Autowired
-	EntryRepository entryRepository;
+    @Autowired
+    EntryRepository entryRepository;
 
-	@Autowired
-	PrntscrService prntscrService;
+    @Autowired
+    PrntscrService prntscrService;
 
-	@Autowired
-	BlockService blockService;
+    @Autowired
+    BlockService blockService;
 
-	@Autowired
-	EntryService entryService;
+    @Autowired
+    EntryService entryService;
 
-	public static void main(String[] args) {
-		SpringApplication.run(FspApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(FspApplication.class, args);
+    }
 
-	@PostConstruct
-	public void init() {
-		Utils.withRole("ROLE_ADMIN");
-		Base b = new Base();
-		b.id = 1L;
-		b.base = getCurrentBase();
-		if (b.base != null && b.base.length() > 0) {
-			baseRepository.save(b);
-		}
-		Utils.clearRole();
-		Timer timer = new Timer();
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				try {
-					blockService.clean();
-					entryService.clean();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}, HOUR, HOUR);
-	}
+    @PostConstruct
+    public void init() {
+        Utils.withRole("ROLE_ADMIN");
+        Base b = baseRepository.findOne(1L);
+        if (b == null) {
+            b = new Base();
+            b.id = 1L;
+            b.base = getCurrentBase();
+            if (b.base != null && b.base.length() > 0) {
+                baseRepository.save(b);
+            }
+        }
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    blockService.clean();
+                    entryService.clean();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, HOUR, HOUR);
+        Utils.clearRole();
+    }
 
-	private String getCurrentBase() {
-		InputStream stream = getClass().getClassLoader().getResourceAsStream("static/img/space.png");
-		PrntscrResponse prntscrResponse = prntscrService.uploadImage(stream);
-		if (prntscrResponse != null) {
-			if (prntscrResponse.status.equalsIgnoreCase("success")) {
-				String url = prntscrResponse.data;
-				if (url != null && url.trim().length() > 0) {
-					String prntscrid = url.substring(url.lastIndexOf("/") + 1);
-					return prntscrid.substring(0, prntscrid.length() - 1);
-				}
-			} else {
-				System.out.println(prntscrResponse.data);
-			}
-		}
-		return null;
-	}
+    private String getCurrentBase() {
+        InputStream stream = getClass().getClassLoader().getResourceAsStream("static/img/space.png");
+        PrntscrResponse prntscrResponse = prntscrService.uploadImage(stream);
+        if (prntscrResponse != null) {
+            if (prntscrResponse.status.equalsIgnoreCase("success")) {
+                String url = prntscrResponse.data;
+                if (url != null && url.trim().length() > 0) {
+                    String prntscrid = url.substring(url.lastIndexOf("/") + 1);
+                    return prntscrid.substring(0, prntscrid.length() - 1);
+                }
+            } else {
+                System.out.println(prntscrResponse.data);
+            }
+        }
+        return null;
+    }
 }
