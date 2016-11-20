@@ -6,10 +6,10 @@
     <link rel="icon" type="image/png" href="/img/favicon.png">
     <title>Зеленая стрела - Коричневая полоса</title>
     <link rel="stylesheet" href="/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="/css/fsp.css" />
+    <link rel="stylesheet" href="/css/fsp.css?version=2" />
     <script src="/js/angular.min.js"></script>
     <script src="/js/ui-bootstrap-tpls-2.2.0.min.js"></script>
-    <script src="/js/fsp.js"></script>
+    <script src="/js/fsp.js?version=2"></script>
 </head>
 <body>
 <div ng-controller="fspController">
@@ -32,7 +32,10 @@
                 {{entry.time}}
             </td>
             <td>
-                <img src="{{entry.url}}"/>
+                <div class="img-wrap">
+                    <span class="close" ng-click="deleteImage(entry.id)">&times;</span>
+                    <img src="{{entry.url}}">
+                </div>
             </td>
         </tr>
     </table>

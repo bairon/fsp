@@ -11,11 +11,11 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
     $scope.screens = "Скрины";
     $scope.update = function () {
         $scope.currentPage = 1;
-        getEntries();
+        $scope.getEntries();
     };
     $http.defaults.headers.post["Content-Type"] = "application/json";
 
-    function getEntries() {
+    $scope.getEntries = function() {
         //get all entries and display initially
         $http.get('/entries?page=' + ($scope.currentPage - 1) + "&sort=timestamp,desc").
         success(function (data) {
@@ -30,22 +30,30 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
                 $scope.entries = [];
             }
             for (i = 0; i < $scope.entries.length; i++) {
-                $scope.entries[i].time = formatDate($scope.entries[i].timestamp);
+                $scope.entries[i].time = $scope.formatDate($scope.entries[i].timestamp);
             }
         });
-    }
-    function formatDate(timestamp) {
+    };
+    $scope.formatDate = function(timestamp) {
         var d = new Date(timestamp);
         return ("0" + d.getDate()).slice(-2) + "-" + ("0"+(d.getMonth()+1)).slice(-2) + "-" +
             d.getFullYear() + " " + ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
 
 
-    }
-    getEntries();
-    $scope.pageChanged = function() {
-        getEntries();
     };
-    var asknew = function() {
+    $scope.pageChanged = function() {
+        $scope.getEntries();
+    };
+    $scope.deleteImage = function(entryid) {
+        $http.delete('/entries/' + entryid).success(
+            function (data, status, headers) {
+                $scope.getEntries();
+            }
+        ).error(
+
+        )
+    };
+    $scope.asknew = function() {
         $http.get('/entries/newcount?since=' + $scope.since).
         success(function (data) {
             if (data != undefined) {
@@ -54,12 +62,11 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
                 }
             }
         });
-        $timeout(asknew, 10000);
+        $timeout($scope.asknew, 10000);
     };
 
-    $timeout(asknew, 10000);
-
-
+    $timeout($scope.asknew, 10000);
+    $scope.getEntries();
 });
 
 
