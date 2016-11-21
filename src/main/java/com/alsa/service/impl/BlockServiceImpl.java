@@ -77,8 +77,13 @@ public class BlockServiceImpl implements BlockService {
             if (compare <= 0) {
                 basestampIterator.remove();
             }
-            gap = System.currentTimeMillis() - basestamp.timestamp;
+        }
+        if (baseStamps.size() > 0) {
+            Basestamp first = baseStamps.getFirst();
+            gap = System.currentTimeMillis() - first.timestamp;
             if (gap < 0) gap = 0;
+        } else {
+            gap = 0;
         }
     }
 
