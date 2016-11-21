@@ -9,6 +9,7 @@ import com.alsa.repository.EntryRepository;
 import com.alsa.service.BlockService;
 import com.alsa.service.EntryService;
 import com.alsa.service.PrntscrService;
+import com.alsa.worker.PrntscrSearch;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
@@ -56,6 +57,9 @@ public class FspApplication {
     @Autowired
     EntryService entryService;
 
+    @Autowired
+    PrntscrSearch prntscrSearch;
+
     public static void main(String[] args) {
         SpringApplication.run(FspApplication.class, args);
     }
@@ -85,6 +89,7 @@ public class FspApplication {
             }
         }, HOUR, HOUR);
         Utils.clearRole();
+        new Thread(prntscrSearch).start();
     }
 
     private String getCurrentBase() {
