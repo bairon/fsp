@@ -65,4 +65,16 @@ public class RestAPIController {
         return entryService.newcount(since);
     }
 
+    @RequestMapping(value = WebConstants.GAP, method = RequestMethod.GET)
+    public long gap() {
+        return blockService.gap();
+    }
+
+    @RequestMapping(value = WebConstants.OVERTAKE, method = RequestMethod.POST)
+    public void overtake() {
+        blockService.overtake();
+    }
+
+
+
 }

@@ -5,6 +5,8 @@ package com.alsa;
  */
 public final class WebConstants {
 
+    public static final String OVERTAKE = "/overtake";
+
     private WebConstants() {
     }
 
@@ -14,7 +16,9 @@ public final class WebConstants {
     public static final String POST_BLOCK = "/postBlock";
     public static final String ENTRIES = "/entries";
     public static final String ENTRIES_NEWCOUNT = "/entries/newcount";
+    public static final String GAP = "/gap";
     public final static String SIGNIN = "/signin";
     public final static String CREATE_BLOCK = "/createBlock";
     public static final int HOUR = 3600 * 1000;
+    public static final int MINUTE = 60 * 1000;
 }

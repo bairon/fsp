@@ -10,4 +10,7 @@ public interface BlockService {
 
     Block save(Block block);
     void clean();
+    void submitBaseTimestamp(long timestamp, String base);
+    long gap();
+    void overtake();
 }

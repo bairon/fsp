@@ -9,6 +9,7 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
 
     $scope.entries = [];
     $scope.screens = "Скрины";
+    $scope.gap = 0;
     $scope.update = function () {
         $scope.currentPage = 1;
         $scope.getEntries();
@@ -62,10 +63,20 @@ fspModule.controller('fspController', function ($scope,$http, $timeout) {
                 }
             }
         });
-        $timeout($scope.asknew, 10000);
+        $http.get('/gap').success(
+            function(data) {
+                if (data != undefined) {
+                    $scope.gap = data;
+                }
+            }
+        );
+        $timeout($scope.asknew, 20000);
+    };
+    $scope.overtake = function() {
+        $http.post('/overtake');
     };
 
-    $timeout($scope.asknew, 10000);
+    $timeout($scope.asknew, 20000);
     $scope.getEntries();
 });
 

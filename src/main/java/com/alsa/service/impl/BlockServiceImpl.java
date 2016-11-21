@@ -2,6 +2,7 @@ package com.alsa.service.impl;
 
 import com.alsa.Utils;
 import com.alsa.domain.Base;
+import com.alsa.domain.Basestamp;
 import com.alsa.domain.Block;
 import com.alsa.domain.BlockStatus;
 import com.alsa.repository.BaseRepository;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.alsa.WebConstants.HOUR;
@@ -30,6 +33,9 @@ public class BlockServiceImpl implements BlockService {
 
     @Autowired
     BaseRepository baseRepository;
+
+    private LinkedList<Basestamp> baseStamps = new LinkedList<>();
+    private long gap;
 
     @Override
 
@@ -55,11 +61,25 @@ public class BlockServiceImpl implements BlockService {
             Utils.withRole("ROLE_ADMIN");
             baseRepository.save(base);
             Utils.withRole("ROLE_USER");
+            updateGap(base);
         }
         if (result != null) {
             blockRepository.save(result);
         }
         return result;
+    }
+
+    private void updateGap(Base base) {
+        Iterator<Basestamp> basestampIterator = baseStamps.iterator();
+        while(basestampIterator.hasNext()) {
+            Basestamp basestamp = basestampIterator.next();
+            int compare = basestamp.base.compareTo(base.base);
+            if (compare <= 0) {
+                basestampIterator.remove();
+            }
+            gap = System.currentTimeMillis() - basestamp.timestamp;
+            if (gap < 0) gap = 0;
+        }
     }
 
     @Override
@@ -75,5 +95,36 @@ public class BlockServiceImpl implements BlockService {
         Utils.withRole("ROLE_ADMIN");
         blockRepository.deleteByProcessedTimeLessThan(System.currentTimeMillis() - HOUR);
         Utils.clearRole();
+    }
+
+    @Override
+    public synchronized void submitBaseTimestamp(long timestamp, String base) {
+        try {
+            if (base != null) {
+                baseStamps.add(new Basestamp(timestamp, base));
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
+    }
+
+    @Override
+    public long gap() {
+        return gap / 60000;
+    }
+
+    @Override
+    public synchronized void overtake() {
+        if (baseStamps.size() > 0) {
+            Basestamp last = baseStamps.getLast();
+            Utils.withRole("ROLE_ADMIN");
+            Base base = new Base();
+            base.id = 1L;
+            base.base = last.base;
+            baseRepository.save(base);
+            Utils.withRole("ROLE_USER");
+            baseStamps.clear();
+            gap = 0;
+        }
     }
 }

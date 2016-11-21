@@ -1,7 +1,6 @@
 package com.alsa;
 
 import com.alsa.domain.Base;
-import com.alsa.domain.Entry;
 import com.alsa.domain.PrntscrResponse;
 import com.alsa.repository.BaseRepository;
 import com.alsa.repository.BlockRepository;
@@ -10,31 +9,17 @@ import com.alsa.service.BlockService;
 import com.alsa.service.EntryService;
 import com.alsa.service.PrntscrService;
 import com.alsa.worker.PrntscrSearch;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
-import java.util.Date;
+import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static com.alsa.WebConstants.HOUR;
+import static com.alsa.WebConstants.MINUTE;
 
 @SpringBootApplication
 public class FspApplication {
@@ -88,11 +73,25 @@ public class FspApplication {
                 }
             }
         }, HOUR, HOUR);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                String currentBase;
+                int counter = 0;
+                do {
+                    currentBase = getCurrentBase();
+                    long currentTimestamp = System.currentTimeMillis();
+                    blockService.submitBaseTimestamp(currentTimestamp, currentBase);
+                    Utils.sleep(5000);
+                } while (currentBase == null && counter++ < 20);
+            }
+        }, MINUTE, 5 * MINUTE);
         Utils.clearRole();
         new Thread(prntscrSearch).start();
     }
 
-    private String getCurrentBase() {
+    private synchronized String getCurrentBase() {
+        String result = null;
         InputStream stream = getClass().getClassLoader().getResourceAsStream("static/img/space.png");
         PrntscrResponse prntscrResponse = prntscrService.uploadImage(stream);
         if (prntscrResponse != null) {
@@ -100,12 +99,13 @@ public class FspApplication {
                 String url = prntscrResponse.data;
                 if (url != null && url.trim().length() > 0) {
                     String prntscrid = url.substring(url.lastIndexOf("/") + 1);
-                    return prntscrid.substring(0, prntscrid.length() - 1);
+                    result = prntscrid.substring(0, prntscrid.length() - 1);
                 }
             } else {
                 System.out.println(prntscrResponse.data);
             }
         }
-        return null;
+        System.out.println("getCurrentBase() returning " + result);
+        return result;
     }
 }
