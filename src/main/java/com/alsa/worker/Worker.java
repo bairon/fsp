@@ -62,10 +62,17 @@ public class Worker {
             for (int i = 0; i < 36; ++i) {
                 String prntscr = block.base + Integer.toString(i, 36);
                 try {
+                    long startT = System.currentTimeMillis();
                     Entry entry = processEntry(prntscr, 10);
                     updateProgress(i, 36);
                     if (entry != null) {
                         postEntry(entry);
+                    }
+                    long endT = System.currentTimeMillis();
+                    long diff = endT - startT;
+                    long toSleep = 700 - diff;
+                    if (toSleep > 0) {
+                        sleep(toSleep);
                     }
                 } catch (NotExistException nee) {
                     repeatList.add(prntscr);
