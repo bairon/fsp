@@ -1,5 +1,6 @@
 package com.alsa.worker;
 
+import com.alsa.Utils;
 import com.alsa.domain.Block;
 import com.alsa.domain.Entry;
 import com.alsa.service.BlockService;
@@ -70,7 +71,7 @@ public class Worker {
                     }
                     long endT = System.currentTimeMillis();
                     long diff = endT - startT;
-                    long toSleep = 400 - diff;
+                    long toSleep = 700 - diff;
                     if (toSleep > 0) {
                         sleep(toSleep);
                     }
@@ -168,7 +169,10 @@ public class Worker {
         String response = client.execute(request, new BasicResponseHandler());
         String between = between(response, "meta name=\"twitter:image:src\" content=\"", "\"");
         if (between.length() > 150 || between.length() < 0) {
+            System.out.println(response);
+            sleep(10000);
             return null;
+
         }
         return between;
     }
