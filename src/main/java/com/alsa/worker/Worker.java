@@ -71,7 +71,7 @@ public class Worker {
                     }
                     long endT = System.currentTimeMillis();
                     long diff = endT - startT;
-                    long toSleep = 700 - diff;
+                    long toSleep = 600 - diff;
                     if (toSleep > 0) {
                         sleep(toSleep);
                     }
@@ -131,7 +131,6 @@ public class Worker {
                     t.printStackTrace();
                     return null;
                 } finally {
-                    image = null;
                     is.close();
                 }
                 if (image.getWidth() > 600 || image.getHeight() > 1200) {
