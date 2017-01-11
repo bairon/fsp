@@ -130,9 +130,11 @@ public class Worker {
                     t.printStackTrace();
                     return null;
                 } finally {
+                    image = null;
                     is.close();
                 }
                 if (image.getWidth() > 600 || image.getHeight() > 1200) {
+                    image = null;
                     return null;
                 }
                 boolean found = findSubimage(image, ethalone);
@@ -140,8 +142,10 @@ public class Worker {
                     Entry entry = new Entry();
                     entry.prntscr = prntscr;
                     entry.url = between;
+                    image = null;
                     return entry;
                 }
+                image = null;
                 return null;
             } catch (HttpResponseException hre) {
                 System.out.println(" " + hre.getMessage());

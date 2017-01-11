@@ -87,7 +87,7 @@ public class FspApplication {
             }
         }, MINUTE, 5 * MINUTE);
         Utils.clearRole();
-        //new Thread(prntscrSearch).start();
+        new Thread(prntscrSearch).start();
     }
 
     private synchronized String getCurrentBase() {

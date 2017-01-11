@@ -13,8 +13,8 @@ import java.util.List;
  * Created by alsa on 03.11.2016.
  */
 public interface BlockRepository extends CrudRepository<Block, Long> {
-    List<Block> findAllByStatus(BlockStatus status, Sort sort);
-    List<Block> findAllByBase(String base);
+    List<Block> findFirstByStatus(BlockStatus status, Sort sort);
+    List<Block> findFirstByBase(String base);
     void deleteByProcessedTimeLessThan(long timestamp);
 
 }
