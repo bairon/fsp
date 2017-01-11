@@ -70,7 +70,7 @@ public class Worker {
                     }
                     long endT = System.currentTimeMillis();
                     long diff = endT - startT;
-                    long toSleep = 700 - diff;
+                    long toSleep = 400 - diff;
                     if (toSleep > 0) {
                         sleep(toSleep);
                     }
@@ -148,7 +148,7 @@ public class Worker {
                 sleep(1500);
             } catch (Throwable t) {
                 System.out.println(" " + t.getMessage());
-                client = HttpClientBuilder.create().addInterceptorLast(new RequestAcceptEncoding()).addInterceptorLast(new ResponseContentEncoding()).setDefaultRequestConfig(requestConfig).build();
+                //client = HttpClientBuilder.create().addInterceptorLast(new RequestAcceptEncoding()).addInterceptorLast(new ResponseContentEncoding()).setDefaultRequestConfig(requestConfig).build();
                 if (t.getMessage() != null && !t.getMessage().contains("Error reading PNG")) {
                     sleep(1500);
                 } else {
