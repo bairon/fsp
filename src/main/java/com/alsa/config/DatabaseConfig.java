@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 /**
  * Created by alsa on 20.11.2016.
  */
-@Configuration
+//@Configuration
 public class DatabaseConfig {
     @Bean
     @Primary

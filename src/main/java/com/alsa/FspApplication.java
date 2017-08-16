@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.annotation.PostConstruct;
 import java.io.InputStream;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -52,13 +53,13 @@ public class FspApplication {
     @PostConstruct
     public void init() {
         Utils.withRole("ROLE_USER", "ROLE_ADMIN");
-        Base b = baseRepository.findOne(1L);
-        if (b == null) {
-            b = new Base();
-            b.id = 1L;
-            b.base = getCurrentBase();
-            if (b.base != null && b.base.length() > 0) {
-                baseRepository.save(b);
+        Optional<Base> b = baseRepository.findById(1L);
+        if (!b.isPresent()) {
+            Base newBase = new Base();
+            newBase.id = 1L;
+            newBase.base = getCurrentBase();
+            if (newBase.base != null && newBase.base.length() > 0) {
+                baseRepository.save(newBase);
             }
         }
         Timer timer = new Timer();
