@@ -13,15 +13,22 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.RequestAcceptEncoding;
 import org.apache.http.client.protocol.ResponseContentEncoding;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
+import javax.net.ssl.SSLContext;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,11 +37,14 @@ import java.util.List;
  */
 @Component
 public class Worker {
-    public HttpClient client;
+    public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36";
+
+    public HttpClient externalClient;
     public String prntscrServer;
     public BufferedImage ethalone;
     public ProgressListener progressListener;
-    public RequestConfig requestConfig;
+    RequestConfig externalRequestConfig;
+    private HttpClientBuilder externalHttpClientBuilder;
 
     @Autowired
     BlockService blockService;
@@ -47,12 +57,25 @@ public class Worker {
     public void init(String prntscrServer, ProgressListener progressListener) {
         try {
             this.prntscrServer = prntscrServer;
-            requestConfig = RequestConfig.custom().
-                    setConnectionRequestTimeout(3000).setConnectTimeout(3000).setSocketTimeout(3000).build();
-            client = HttpClientBuilder.create().addInterceptorLast(new RequestAcceptEncoding()).addInterceptorLast(new ResponseContentEncoding()).setDefaultRequestConfig(requestConfig).build();
+            SSLContextBuilder sslContextBuilder = SSLContextBuilder.create();
+            sslContextBuilder.loadTrustMaterial(new TrustSelfSignedStrategy());
+            SSLContext sslContext = sslContextBuilder.build();
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext, new org.apache.http.conn.ssl.DefaultHostnameVerifier());
+
+
+            externalRequestConfig = RequestConfig.custom().setConnectionRequestTimeout(3000).setConnectTimeout(3000).setSocketTimeout(3000).build();
+            externalHttpClientBuilder = HttpClientBuilder.create().setSSLSocketFactory(sslSocketFactory).addInterceptorLast(new RequestAcceptEncoding()).addInterceptorLast(new ResponseContentEncoding())
+                    .setDefaultRequestConfig(externalRequestConfig).setUserAgent(USER_AGENT);
+            externalClient = externalHttpClientBuilder.build();
             this.ethalone = ImageIO.read(getClass().getClassLoader().getResourceAsStream("static/img/bar.png"));
             this.progressListener = progressListener;
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
             e.printStackTrace();
         }
     }
@@ -87,9 +110,7 @@ public class Worker {
             }
             postBlock(block);
         } catch (Throwable t) {
-            System.out.print("Ошибка ");
-            t.printStackTrace();
-            sleep(5000);
+            throw new WorkerException(t);
         }
     }
 
@@ -103,13 +124,14 @@ public class Worker {
         int removedscreeninarow = 0;
         for (int i = 0; i < repeat; ++i) {
             try {
-                String url = "http://" + prntscrServer + "/" + prntscr + (removedscreeninarow > 0 ? "?ts=" + System.currentTimeMillis() : "");
+                String url = "https://" + prntscrServer + "/" + prntscr + (removedscreeninarow > 0 ? "?ts=" + System.currentTimeMillis() : "");
+                //String url = "https://" + prntscrServer + "/";
                 System.out.print("Visiting " + url);
-                String between = request(client, url);
+                String between = request(externalClient, url);
                 if (between == null) continue;
                 System.out.println(" " + between);
-                if (between.contains("8tdUI8N.png") ||
-                        between.equals("https://img-fotki.yandex.ru/get/49649/5191850.0/0_173a7b_211be8ff_orig")) {
+                if (between.contains("0_173a7b_211be8ff.png") ||
+                        between.equals("https://st.prntscr.com/2017/08/01/1525/img/0_173a7b_211be8ff.png")) {
                     removedscreeninarow++;
                     if (removedscreeninarow <= 10) {
                         sleep(5000);
@@ -119,7 +141,7 @@ public class Worker {
                     }
                 }
                 BufferedImage image = null;
-                HttpResponse execute = client.execute(new HttpGet(between));
+                HttpResponse execute = externalClient.execute(new HttpGet(between));
                 if (execute == null) continue;
                 HttpEntity entity = execute.getEntity();
                 if (entity == null) continue;
@@ -134,7 +156,6 @@ public class Worker {
                     is.close();
                 }
                 if (image.getWidth() > 600 || image.getHeight() > 1200) {
-                    image = null;
                     return null;
                 }
                 boolean found = findSubimage(image, ethalone);
@@ -142,17 +163,15 @@ public class Worker {
                     Entry entry = new Entry();
                     entry.prntscr = prntscr;
                     entry.url = between;
-                    image = null;
                     return entry;
                 }
-                image = null;
                 return null;
             } catch (HttpResponseException hre) {
                 System.out.println(" " + hre.getMessage());
                 sleep(1500);
             } catch (Throwable t) {
                 System.out.println(" " + t.getMessage());
-                //client = HttpClientBuilder.create().addInterceptorLast(new RequestAcceptEncoding()).addInterceptorLast(new ResponseContentEncoding()).setDefaultRequestConfig(requestConfig).build();
+                externalClient = externalHttpClientBuilder.build();
                 if (t.getMessage() != null && !t.getMessage().contains("Error reading PNG")) {
                     sleep(1500);
                 } else {

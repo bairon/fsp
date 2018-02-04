@@ -15,6 +15,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import javax.annotation.PostConstruct;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -88,25 +91,34 @@ public class FspApplication {
             }
         }, MINUTE, 5 * MINUTE);
         Utils.clearRole();
-        //new Thread(prntscrSearch).start();
+        new Thread(prntscrSearch).start();
     }
 
     private synchronized String getCurrentBase() {
-        String result = null;
-        InputStream stream = getClass().getClassLoader().getResourceAsStream("static/img/space.png");
-        PrntscrResponse prntscrResponse = prntscrService.uploadImage(stream);
-        if (prntscrResponse != null) {
-            if (prntscrResponse.status.equalsIgnoreCase("success")) {
-                String url = prntscrResponse.data;
-                if (url != null && url.trim().length() > 0) {
-                    String prntscrid = url.substring(url.lastIndexOf("/") + 1);
-                    result = prntscrid.substring(0, prntscrid.length() - 1);
+        try {
+            String result = null;
+            InputStream stream = getClass().getClassLoader().getResourceAsStream("static/img/space.png");
+            PrntscrResponse prntscrResponse = prntscrService.uploadImage(stream);
+            if (prntscrResponse != null) {
+                if (prntscrResponse.status.equalsIgnoreCase("success")) {
+                    String url = prntscrResponse.data;
+                    if (url != null && url.trim().length() > 0) {
+                        String prntscrid = url.substring(url.lastIndexOf("/") + 1);
+                        result = prntscrid.substring(0, prntscrid.length() - 1);
+                    }
+                } else {
+                    System.out.println(prntscrResponse.data);
                 }
-            } else {
-                System.out.println(prntscrResponse.data);
             }
+            System.out.println("getCurrentBase() returning " + result);
+            return result;
+        } catch (KeyStoreException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
         }
-        System.out.println("getCurrentBase() returning " + result);
-        return result;
+        return null;
     }
 }
