@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.alsa.WebConstants.HOUR;
 
@@ -43,23 +42,22 @@ public class BlockServiceImpl implements BlockService {
             processingBlocks.get(0).processedTime = System.currentTimeMillis();
             result = processingBlocks.get(0);
         } else {
-            Optional<Base> base = baseRepository.findById(1L);
-            if (!base.isPresent() || base.get().base == null || base.get().base.length() == 0)
+            Base base = baseRepository.findOne(1L);
+            if (base == null)
                 throw new IllegalStateException("Base not set");
-            Base bss = base.get();
-            while(!blockRepository.findFirstByBase(bss.base).isEmpty()) {
-                bss.base = Utils.plusOneBase36(bss.base);
+            while(!blockRepository.findFirstByBase(base.base).isEmpty()) {
+                base.base = Utils.plusOneBase36(base.base);
             }
             Block newBlock = new Block();
             newBlock.processedTime = System.currentTimeMillis();
-            newBlock.base = bss.base;
+            newBlock.base = base.base;
             newBlock.status = BlockStatus.PROCESSING;
             result = newBlock;
-            bss.base = Utils.plusOneBase36(bss.base);
+            base.base = Utils.plusOneBase36(base.base);
             Utils.withRole("ROLE_ADMIN");
-            baseRepository.save(bss);
+            baseRepository.save(base);
             Utils.withRole("ROLE_USER");
-            updateGap(bss);
+            updateGap(base);
         }
         if (result != null) {
             blockRepository.save(result);
