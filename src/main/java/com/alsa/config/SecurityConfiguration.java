@@ -6,6 +6,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 
 /**
@@ -18,11 +20,12 @@ public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        UserDetails user = User.withDefaultPasswordEncoder().username("user").password("user").roles("USER").build();
+        UserDetails admin = User.withDefaultPasswordEncoder().username("admin").password("admin").roles("USER", "ADMIN").build();
+        auth.inMemoryAuthentication()
+                .withUser(user)
+                .withUser(admin);
 
-        auth.inMemoryAuthentication().//
-                passwordEncoder(NoOpPasswordEncoder.getInstance()).
-                withUser("user").password("user").roles("USER").and().//
-                withUser("admin").password("admin").roles("USER", "ADMIN");
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
