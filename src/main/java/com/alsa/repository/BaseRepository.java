@@ -19,12 +19,11 @@ public interface BaseRepository extends PagingAndSortingRepository<Base, Long> {
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    void delete(Long aLong);
-
+    void deleteById(Long aLong);
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    void delete(Iterable<? extends Base> iterable);
+    void deleteAll(Iterable<? extends Base> iterable);
 
     @Override
     @PreAuthorize("hasRole('ROLE_ADMIN')")
