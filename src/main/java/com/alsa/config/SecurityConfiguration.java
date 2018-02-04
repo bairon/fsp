@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 
 /**
  * Created by alsa on 03.11.2016.
@@ -19,6 +20,7 @@ public class SecurityConfiguration  extends WebSecurityConfigurerAdapter {
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
         auth.inMemoryAuthentication().//
+                passwordEncoder(NoOpPasswordEncoder.getInstance()).
                 withUser("user").password("user").roles("USER").and().//
                 withUser("admin").password("admin").roles("USER", "ADMIN");
     }
